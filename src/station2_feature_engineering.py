@@ -9,8 +9,8 @@ import os
 from scipy.cluster.hierarchy import dendrogram, linkage
 
 # Inputs #
-filepath   = r'stage_1_crypto_data.csv'
-exportpath = r'Week5'
+filepath   = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage_1_crypto_data.csv'
+exportpath = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station2'
 
 def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
     
@@ -19,12 +19,10 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
     
     # 0 NaN checker #
     df.isnull().sum()
-    df['close'] = np.where(df['close'] == 0,np.NaN, df['close'])
+    df['close'] = np.where(df['close'] == 0,np.nan, df['close'])
     
     # Step 2: Pivot the data
-    df = df.pivot_table(index = 'date',
-                        columns = 'ticker',
-                        values = 'close').reset_index()
+    df = df.pivot_table(index = 'date',columns = 'ticker', values = 'close').reset_index()
 
     df['date'] = pd.to_datetime(df['date'])
     df = df.set_index(['date'])
@@ -61,7 +59,6 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
             
         normality_tests = pd.DataFrame(normality_tests)
     
-    
         # Outliers #
         # Function to identify outliers using the IQR method
         def identify_outliers(df, column):
@@ -95,8 +92,7 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         # Summarize the outliers
         outliers_summary = {stock: len(outliers[stock]) for stock in outliers}
         
-        outliers_summary_df = pd.DataFrame.from_dict(outliers_summary, orient='index', 
-                                                     columns=['Number of Outliers'])
+        outliers_summary_df = pd.DataFrame.from_dict(outliers_summary, orient='index', columns=['Number of Outliers'])
           
         # Correlation Analyses
         correlation_matrix = df.corr()   
@@ -139,7 +135,6 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
         
-    
         # Time-series statistics
         plt.figure(figsize=(16, 20))
         for i, stock in enumerate(df.columns[:6], 1):
@@ -155,7 +150,6 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         filename = 'time_series.png'
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
-    
     
         # Calculate rolling mean and standard deviation (window of 12 months)
         rolling_stats = {}
@@ -179,7 +173,6 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         filename = 'time_series_rolling.png'
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
-    
     
         # Recalculate the risk-adjusted metrics with date as the index
         # Assuming a risk-free rate of 0.02% per day
@@ -276,7 +269,7 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna()
-    df.to_csv(  os.path.join(exportpath,'stage_2_crypto_data.csv')   )
+    df.to_csv( os.path.join(exportpath,'stage_2_crypto_data.csv')   )
     descriptive_stats.to_csv(  os.path.join(exportpath,'stage_2_descriptive_stats.csv')   )
     
     print("______________________________________")
@@ -285,7 +278,7 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         
     return df, descriptive_stats
 
-##################### Execute the function #####################
+#############################Execute the function#######################################
 df, descriptive_stats = Station2_featureEngineering(filepath, exportpath, gen_plots=True)
-###########################################################
-########################### END ###########################
+##########################################################################################
+########################### END ##########################################################
