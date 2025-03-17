@@ -223,7 +223,7 @@ def station_3_model_design_basic(returns_data,exportpath, ra = 0.1 ):
       
     return list([weights, portfolio_returns, descriptive_stats])
         
-##################### Execute the function #####################
+##################### Execute the function #############################
 station3_output = station_3_model_design_basic(df,exportpath, ra = 0.1 )
-###########################################################
-########################### END ###########################
+########################################################################
+########################### END ########################################

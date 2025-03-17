@@ -51,9 +51,9 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
     
         # Conduct Shapiro-Wilk test for normality
         normality_tests = {}
-        for stock in df.columns:  # Skip the date column
-            stat, p_value = shapiro(df[stock])
-            normality_tests[stock] = {'Shapiro-Wilk Statistic': np.round(stat,3), 'p-value': np.round(p_value,3)}
+        for crypto in df.columns:  # Skip the date column
+            stat, p_value = shapiro(df[crypto])
+            normality_tests[crypto] = {'Shapiro-Wilk Statistic': np.round(stat,3), 'p-value': np.round(p_value,3)}
             
         normality_tests = pd.DataFrame(normality_tests)
 
@@ -69,16 +69,16 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
             upper_bound = Q3 + 1.5 * IQR
             return df[(df[column] < lower_bound) | (df[column] > upper_bound)]
         
-        # Identify outliers for each stock and store the results
-        outliers = {stock: identify_outliers(df, stock) for stock in df.columns}
+        # Identify outliers for each crypto and store the results
+        outliers = {crypto: identify_outliers(df, crypto) for crypto in df.columns}
     
         # Generate box plots for visual inspection of outliers
         plt.figure(figsize=(16, 20))
         
-        for i, stock in enumerate(df.columns, 1):
+        for i, crypto in enumerate(df.columns, 1):
             plt.subplot(len(df.columns) // 2 + 1, 2, i)
-            sns.boxplot(y=df[stock]*100)
-            plt.title(f'Box plot for {stock}', fontsize=18)
+            sns.boxplot(y=df[crypto]*100)
+            plt.title(f'Box plot for {crypto}', fontsize=18)
             plt.ylabel('Daily Return (%)', fontsize=16)
             plt.yticks(fontsize=18)
         
@@ -90,7 +90,7 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         plt.show()
     
         # Summarize the outliers
-        outliers_summary = {stock: len(outliers[stock]) for stock in outliers}
+        outliers_summary = {crypto: len(outliers[crypto]) for crypto in outliers}
         
         outliers_summary_df = pd.DataFrame.from_dict(outliers_summary, orient='index', columns=['Number of Outliers'])
 
@@ -127,7 +127,7 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         plt.figure(figsize=(12, 8))
         dendrogram(Z, labels=correlation_matrix.columns, leaf_rotation=90, leaf_font_size=14)
         plt.title('Dendrogram : Clustering using Correlation', fontsize=18)
-        plt.xlabel('Stock', fontsize=16)
+        plt.xlabel('Crypto', fontsize=16)
         plt.ylabel('Distance', fontsize=16)
         
         # Increase font size of x and y ticks
@@ -143,10 +143,10 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         # Time-series statistics #
         """
         plt.figure(figsize=(16, 20))
-        for i, stock in enumerate(df.columns, 1):
+        for i, crypto in enumerate(df.columns, 1):
             plt.subplot(len(df.columns) // 2 + 1, 2, i)
-            plt.plot(df.index, df[stock])
-            plt.title(f'Time Series for {stock}', fontsize=14)
+            plt.plot(df.index, df[crypto])
+            plt.title(f'Time Series for {crypto}', fontsize=14)
             plt.xlabel('Date', fontsize=14)
             plt.ylabel('Return', fontsize=14)
             plt.xticks(fontsize=14)
@@ -159,16 +159,16 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         
         # Calculate rolling mean and standard deviation (window of 12 months)
         rolling_stats = {}
-        for stock in df.columns:
-            rolling_stats[stock] = df[stock].rolling(window=21).agg(['mean', 'std'])
+        for crypto in df.columns:
+            rolling_stats[crypto] = df[crypto].rolling(window=21).agg(['mean', 'std'])
         
-        # Plot rolling mean and standard deviation for each stock
+        # Plot rolling mean and standard deviation for each crypto
         plt.figure(figsize=(16, 20))
-        for i, stock in enumerate(df.columns, 1):
+        for i, crypto in enumerate(df.columns, 1):
             plt.subplot(len(df.columns) // 2 + 1, 2, i)
-            plt.plot(df.index, rolling_stats[stock]['mean'], label='Rolling Mean')
-            plt.plot(df.index, rolling_stats[stock]['std'], label='Rolling Std')
-            plt.title(f'Rolling Statistics for {stock}', fontsize=14)
+            plt.plot(df.index, rolling_stats[crypto]['mean'], label='Rolling Mean')
+            plt.plot(df.index, rolling_stats[crypto]['std'], label='Rolling Std')
+            plt.title(f'Rolling Statistics for {crypto}', fontsize=14)
             plt.xlabel('Date', fontsize=14)
             plt.ylabel('Return / Volatility', fontsize=14)
             plt.xticks(fontsize=14)
@@ -185,21 +185,21 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         # Assuming a risk-free rate of 0.02% per day
         risk_free_rate = 0.0000
         
-        # Calculate the average daily return for each stock
+        # Calculate the average daily return for each crypto
         average_returns = df.mean()
         
-        # Calculate the standard deviation of daily returns for each stock
+        # Calculate the standard deviation of daily returns for each crypto
         std_dev_returns = df.std()
         
-        # Calculate the Sharpe Ratio for each stock
+        # Calculate the Sharpe Ratio for each crypto
         sharpe_ratios = (average_returns - risk_free_rate) / std_dev_returns
         
-        # Calculate the Sortino Ratio for each stock
+        # Calculate the Sortino Ratio for each crypto
         negative_returns = df.applymap(lambda x: min(0, x))
         std_dev_negative_returns = negative_returns.std()
         sortino_ratios = (average_returns - risk_free_rate) / std_dev_negative_returns
         
-        # Calculate the Beta for each stock
+        # Calculate the Beta for each crypto
         market_return = df.mean(axis=1)
         betas = df.apply(lambda x: np.cov(x, market_return)[0, 1] / np.var(market_return), axis=0)
         
@@ -224,8 +224,8 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         barplot = sns.barplot(x='ticker', y='Value', hue='Ratio Type', data=ratio_data, palette='muted')
         
         # Customize the plot
-        plt.title('Sharpe Ratio and Sortino Ratio for Each Stock')
-        plt.xlabel('Stock')
+        plt.title('Sharpe Ratio and Sortino Ratio for Each Crypto')
+        plt.xlabel('Crypto')
         plt.ylabel('Ratio Value')
         plt.legend(title='Ratio Type')
         plt.xticks(rotation=45)
@@ -241,8 +241,8 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         beta_plot = sns.barplot(x=betas.index, y=betas.values, palette='muted')
         
         # Customize the plot
-        plt.title('Beta for Each Stock')
-        plt.xlabel('Stock')
+        plt.title('Beta for Each Crypto')
+        plt.xlabel('Crypto')
         plt.ylabel('Beta Value')
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -264,7 +264,7 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         plt.title('Cumulative Returns Over Time', fontsize=16)
         plt.xlabel('Date', fontsize=14)
         plt.ylabel('Cumulative Return', fontsize=14)
-        plt.legend(title='Stock', fontsize=14, title_fontsize=14)
+        plt.legend(title='Crypto', fontsize=14, title_fontsize=14)
         plt.xticks(rotation=45, fontsize=14)
         plt.yticks(fontsize=14)
         plt.tight_layout()
