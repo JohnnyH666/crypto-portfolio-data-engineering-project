@@ -2,9 +2,10 @@ import requests
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import os
 import logging
 
-def station1_load_data(crypto_pairs, api_key,limit, filepath):
+def station1_load_crypto_data(crypto_pairs, api_key,limit, filepath):
     def fetch_crypto_data(symbol, api_key, limit):
         if api_key.strip():  # Check if api_key is not empty or just whitespace
             headers = {'Apikey': api_key}  # The header with your API key
@@ -49,13 +50,33 @@ def top_market_cap_list():
     df['Name'] = df['CoinInfo'].apply(lambda x: x['Name'])
     return df['Name'].values.tolist()
 
-top_crypto_list = top_market_cap_list()
+def station1_load_crypto_news(export_path, api_key=None):
+    headers = {}
+    if api_key and api_key.strip():  # Check if api_key is not None, not empty, and not just whitespace
+        headers['Apikey'] = api_key  # Set the header with your API key
 
+    url = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN'
+    response = requests.get(url, headers=headers)
+    data = response.json()    
+    df = pd.DataFrame( data['Data'] )
+    df['date'] = pd.to_datetime(df['published_on'], unit = "s")
+    
+    # Export #
+    today_date = pd.Timestamp.today().strftime('%d_%m_%Y')
+    suffix = '_Sentiment'
+    
+    df.to_csv(os.path.join(export_path, today_date + suffix + '.csv') )
+             
+    return df
+
+top_crypto_list = top_market_cap_list()
 api_key= ''
 limit  = 365
-filepath= r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/stage_1_crypto_data.csv' # Change this to your filepath
+filepath= r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage_1_crypto_data.csv' # Change this to your filepath
+export_path = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1' 
 
 ##################### Execute the function ###################
-df = station1_load_data(top_crypto_list,api_key,limit,filepath)
+df = station1_load_crypto_data(top_crypto_list, api_key, limit, filepath)
+df2 = station1_load_crypto_news(export_path, api_key = None)
 ##############################################################
 ########################### END ##############################
