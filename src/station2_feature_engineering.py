@@ -12,7 +12,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 filepath   = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage_1_crypto_data.csv'
 exportpath = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station2'
 
-def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
+def station2_feature_engineering(filepath, exportpath, gen_plots=False):
     # Step 1: Read the data
     df = pd.read_csv(filepath)
     
@@ -286,6 +286,6 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
     return df, descriptive_stats
 
 #############################Execute the function#######################################
-df, descriptive_stats = Station2_featureEngineering(filepath, exportpath, gen_plots=True)
+df, descriptive_stats = station2_feature_engineering(filepath, exportpath, gen_plots=True)
 ##########################################################################################
 ########################### END ##########################################################

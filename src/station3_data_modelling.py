@@ -10,7 +10,7 @@ df = df.set_index(['date'])
 exportpath = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station3'
 
 # Function to plot the mean-variance efficient frontier
-def Station_3_Model_Design_Basic(returns_data,exportpath, ra = 0.1 ):
+def station_3_model_design_basic(returns_data,exportpath, ra = 0.1 ):
     num_assets = len(returns_data.iloc[1,])
     # Calculate mean returns and covariance matrix
     returns_data = returns_data*100
@@ -52,8 +52,7 @@ def Station_3_Model_Design_Basic(returns_data,exportpath, ra = 0.1 ):
     min_vol_portfolio = results_frame.loc[min_vol_idx]
     min_vol_weights = weights_record[min_vol_idx]
     
-    
-    # Ooptim Functions #
+    # Optimal Functions #
     def mean_variance(weights):
         portfolio_return = np.dot(weights, mean_returns)
         portfolio_volatility = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
@@ -225,6 +224,6 @@ def Station_3_Model_Design_Basic(returns_data,exportpath, ra = 0.1 ):
     return list([weights, portfolio_returns, descriptive_stats])
         
 ##################### Execute the function #####################
-Station3_output = Station_3_Model_Design_Basic(df,exportpath, ra = 0.1 )
+station3_output = station_3_model_design_basic(df,exportpath, ra = 0.1 )
 ###########################################################
 ########################### END ###########################

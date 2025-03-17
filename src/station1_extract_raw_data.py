@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import logging
 
-def station1_loadData(crypto_pairs, api_key,limit, filepath):
+def station1_load_data(crypto_pairs, api_key,limit, filepath):
     def fetch_crypto_data(symbol, api_key, limit):
         if api_key.strip():  # Check if api_key is not empty or just whitespace
             headers = {'Apikey': api_key}  # The header with your API key
@@ -56,6 +56,6 @@ limit  = 365
 filepath= r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/stage_1_crypto_data.csv' # Change this to your filepath
 
 ##################### Execute the function ###################
-df = station1_loadData(top_crypto_list,api_key,limit,filepath)
+df = station1_load_data(top_crypto_list,api_key,limit,filepath)
 ##############################################################
 ########################### END ##############################
