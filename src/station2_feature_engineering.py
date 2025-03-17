@@ -8,13 +8,12 @@ import statsmodels.api as sm
 import os
 from scipy.cluster.hierarchy import dendrogram, linkage
 
-# Inputs #
+# Inputs and export #
 filepath   = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage_1_crypto_data.csv'
 exportpath = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station2'
 
 def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
-    
-    # Step 1: Read in the data
+    # Step 1: Read the data
     df = pd.read_csv(filepath)
     
     # 0 NaN checker #
@@ -54,12 +53,13 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         normality_tests = {}
         for stock in df.columns:  # Skip the date column
             stat, p_value = shapiro(df[stock])
-            normality_tests[stock] = {'Shapiro-Wilk Statistic': np.round(stat,3),
-                                      'p-value': np.round(p_value,3)}
+            normality_tests[stock] = {'Shapiro-Wilk Statistic': np.round(stat,3), 'p-value': np.round(p_value,3)}
             
         normality_tests = pd.DataFrame(normality_tests)
-    
-        # Outliers #
+
+        '''
+        # Plot for Outliers #
+        '''
         # Function to identify outliers using the IQR method
         def identify_outliers(df, column):
             Q1 = df[column].quantile(0.25)
@@ -75,8 +75,8 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         # Generate box plots for visual inspection of outliers
         plt.figure(figsize=(16, 20))
         
-        for i, stock in enumerate(df.columns[:2], 1):
-            plt.subplot(1, 2, i)
+        for i, stock in enumerate(df.columns, 1):
+            plt.subplot(len(df.columns) // 2 + 1, 2, i)
             sns.boxplot(y=df[stock]*100)
             plt.title(f'Box plot for {stock}', fontsize=18)
             plt.ylabel('Daily Return (%)', fontsize=16)
@@ -93,8 +93,10 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         outliers_summary = {stock: len(outliers[stock]) for stock in outliers}
         
         outliers_summary_df = pd.DataFrame.from_dict(outliers_summary, orient='index', columns=['Number of Outliers'])
-          
-        # Correlation Analyses
+
+        """
+        # Correlation Analyses #
+        """  
         correlation_matrix = df.corr()   
         # Plot the heatmap of the correlation matrix
         plt.figure(figsize=(12, 8))
@@ -111,8 +113,10 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         filename = 'correlation.png'
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
-                    
-        # Clustering    
+
+        """
+        # Clustering 
+        """            
         # Compute the distance matrix using 1 - correlation
         distance_matrix = 1 - correlation_matrix
         
@@ -135,10 +139,12 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
         
-        # Time-series statistics
+        """
+        # Time-series statistics #
+        """
         plt.figure(figsize=(16, 20))
-        for i, stock in enumerate(df.columns[:6], 1):
-            plt.subplot(3, 2, i)
+        for i, stock in enumerate(df.columns, 1):
+            plt.subplot(len(df.columns) // 2 + 1, 2, i)
             plt.plot(df.index, df[stock])
             plt.title(f'Time Series for {stock}', fontsize=14)
             plt.xlabel('Date', fontsize=14)
@@ -150,7 +156,7 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         filename = 'time_series.png'
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
-    
+        
         # Calculate rolling mean and standard deviation (window of 12 months)
         rolling_stats = {}
         for stock in df.columns:
@@ -158,8 +164,8 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         
         # Plot rolling mean and standard deviation for each stock
         plt.figure(figsize=(16, 20))
-        for i, stock in enumerate(df.columns[:6], 1):
-            plt.subplot(3, 2, i)
+        for i, stock in enumerate(df.columns, 1):
+            plt.subplot(len(df.columns) // 2 + 1, 2, i)
             plt.plot(df.index, rolling_stats[stock]['mean'], label='Rolling Mean')
             plt.plot(df.index, rolling_stats[stock]['std'], label='Rolling Std')
             plt.title(f'Rolling Statistics for {stock}', fontsize=14)
@@ -173,7 +179,8 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         filename = 'time_series_rolling.png'
         plt.savefig(os.path.join(exportpath, filename))   
         plt.show()
-    
+
+
         # Recalculate the risk-adjusted metrics with date as the index
         # Assuming a risk-free rate of 0.02% per day
         risk_free_rate = 0.0000
@@ -206,7 +213,7 @@ def Station2_featureEngineering(filepath, exportpath, gen_plots=False):
         })
         
         # Set up the plotting environment
-        sns.set(style="whitegrid")
+        sns.set_theme(style="whitegrid")
         
         # Create a DataFrame for the Sharpe and Sortino Ratios
         ratio_data = risk_adjusted_metrics[['Sharpe Ratio (Annual)', 'Sortino Ratio (Annual)']].reset_index()
