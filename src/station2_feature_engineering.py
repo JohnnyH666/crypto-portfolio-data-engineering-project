@@ -7,6 +7,19 @@ import seaborn as sns
 import statsmodels.api as sm
 import os
 from scipy.cluster.hierarchy import dendrogram, linkage
+import nltk
+from collections import Counter
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords 
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.metrics import confusion_matrix 
+from sklearn.metrics import classification_report
+from tqdm import tqdm
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import re
+nltk.download('punkt_tab')
 
 # Inputs and export #
 filepath   = r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage_1_crypto_data.csv'
@@ -285,7 +298,81 @@ def station2_feature_engineering(filepath, exportpath, gen_plots=False):
         
     return df, descriptive_stats
 
+def station2_feature_engineering_news(exportpath):
+    # =============================================================================
+    # 1: Read in (load) the merged data
+    # =============================================================================
+    # Load the dataset
+    df = pd.read_csv(r'/Users/Johnny/Desktop/crypto-portfolio-data-engineering-project/data/station1/stage1_sentiment.csv')
+    df['datem'] = pd.to_datetime(df['date'])
+
+    # =============================================================================
+    # 2: Feature engineering
+    # =============================================================================
+
+    # Select necessary columns for analysis
+    select_cols = [
+        'datem',
+        'date',
+        'id',
+        'title',
+        'body',
+        'categories'
+    ]
+    df = df[select_cols]
+
+    # Define a function to preprocess text
+    def preprocess_text(text):
+        if not isinstance(text, str):
+            return ""
+        
+        # Remove URLs, mentions, and hashtags
+        text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)
+        text = re.sub(r'\@\w+|\#', '', text)
+        
+        # Tokenize the text
+        tokens = word_tokenize(text)
+        
+        # Remove stop words
+        stop_words = set(stopwords.words('english'))
+        filtered_tokens = [token for token in tokens if token.lower() not in stop_words]
+        
+        # Remove special characters and punctuation
+        filtered_tokens = [re.sub(r'[^a-zA-Z0-9]+', '', token) for token in filtered_tokens]
+        
+        # Remove empty tokens
+        filtered_tokens = [token for token in filtered_tokens if token]
+        
+        # Lemmatize the tokens
+        lemmatizer = WordNetLemmatizer()
+        lemmatized_tokens = [lemmatizer.lemmatize(token) for token in filtered_tokens]
+        
+        # Join the tokens back into a string
+        processed_text = ' '.join(lemmatized_tokens)
+        return processed_text
+
+    # Convert columns to string type and fill NaNs with an empty string
+    df['title'] = df['title'].astype(str).fillna('')
+    df['body'] = df['body'].astype(str).fillna('')
+
+    # Apply the preprocessing function to the 'title' and 'body' columns
+    tqdm.pandas()  # Enable progress_apply
+    df['title_clean'] = df['title'].progress_apply(preprocess_text)
+    df['body_clean'] = df['body'].progress_apply(preprocess_text)
+
+    # =============================================================================
+    # 3: Export to file
+    # =============================================================================
+    # Define file name
+    file_name = 'processed_data.csv'
+
+    # Save the processed data to a CSV file
+    df.to_csv(os.path.join(exportpath, file_name), index=False)
+    return
+
+
 #############################Execute the function#######################################
-df, descriptive_stats = station2_feature_engineering(filepath, exportpath, gen_plots=True)
+#df, descriptive_stats = station2_feature_engineering(filepath, exportpath, gen_plots=True)
+station2_feature_engineering_news(exportpath)
 ##########################################################################################
 ########################### END ##########################################################

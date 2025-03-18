@@ -63,9 +63,9 @@ def station1_load_crypto_news(export_path, api_key=None):
     
     # Export #
     today_date = pd.Timestamp.today().strftime('%d_%m_%Y')
-    suffix = '_Sentiment'
+    suffix = 'stage1_sentiment'
     
-    df.to_csv(os.path.join(export_path, today_date + suffix + '.csv') )
+    df.to_csv(os.path.join(export_path, suffix + '.csv') )
              
     return df
 
